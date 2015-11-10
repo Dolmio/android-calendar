@@ -26,7 +26,7 @@ public class CalendarEventArrayAdapter extends ArrayAdapter<CalendarEvent> {
         View rowView = inflater.inflate(R.layout.calendar_event_list_item, parent, false);
         TextView textView = (TextView) rowView.findViewById(R.id.descriptionLabel);
         CalendarEvent event = values.get(position);
-        textView.setText(event.description);
+        textView.setText(event.getDescription());
         return rowView;
     }
 

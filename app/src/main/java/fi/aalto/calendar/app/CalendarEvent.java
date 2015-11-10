@@ -1,13 +1,23 @@
 package fi.aalto.calendar.app;
 
-/**
- * Created by Dolmio on 09/11/15.
- */
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 public class CalendarEvent {
 
-    public String description;
+    private final String description;
 
-    public CalendarEvent(String description) {
+    @JsonCreator
+    public CalendarEvent(@JsonProperty("description") String description) {
         this.description = description;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    @Override
+    public String toString() {
+        return description;
     }
 }
