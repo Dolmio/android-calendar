@@ -7,13 +7,15 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ListView;
 import android.widget.TextView;
+import com.annimon.stream.Collectors;
+import com.annimon.stream.Stream;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.joda.time.YearMonth;
 import rx.Observable;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
 
-import java.util.Arrays;
+import java.util.List;
 
 public class MonthListFragment extends Fragment {
 
@@ -44,7 +46,9 @@ public class MonthListFragment extends Fragment {
         View view = inflater.inflate(R.layout.fragment_month_list, container, false);
         final ListView listview = (ListView) view.findViewById(R.id.listView);
         final TextView monthLabel = (TextView) view.findViewById(R.id.month_label);
-        monthLabel.setText(((YearMonth) getArguments().getSerializable(YEAR_MONTH_KEY)).toString());
+
+        final YearMonth currentMonthYear = (YearMonth) getArguments().getSerializable(YEAR_MONTH_KEY);
+        monthLabel.setText(currentMonthYear.toString());
 
         ObjectMapper mapper = ((CalendarApplication) getActivity().getApplication()).objectMapper;
         Observable<CalendarEvent[]> eventsObservable = ApiClient.getEvents(((CalendarApplication) getActivity().getApplication()).httpClient, mapper);
@@ -54,7 +58,7 @@ public class MonthListFragment extends Fragment {
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(resultEvents -> {
                     System.out.println("Got " + resultEvents.length + " events");
-                    final CalendarEventArrayAdapter adapter = new CalendarEventArrayAdapter(getContext(), Arrays.asList(resultEvents));
+                    final CalendarEventArrayAdapter adapter = new CalendarEventArrayAdapter(getContext(), eventsInMonth(currentMonthYear, resultEvents));
                     listview.setAdapter(adapter);
 
                 }, throwable -> {
@@ -64,6 +68,13 @@ public class MonthListFragment extends Fragment {
                 });
 
         return view;
+    }
+
+    public static List<CalendarEvent> eventsInMonth(YearMonth yearMonth, CalendarEvent[] events) {
+        return Stream.of(events).filter((e) ->
+                (e.getStartTime().getMonthOfYear() == yearMonth.getMonthOfYear() && e.getStartTime().getYear() == yearMonth.getYear()) ||
+                (e.getEndTime().getMonthOfYear() == yearMonth.getMonthOfYear() && e.getEndTime().getYear() == yearMonth.getYear()))
+                .collect(Collectors.toList());
     }
 
 }
