@@ -63,7 +63,11 @@ public class MonthListFragment extends Fragment {
                 .subscribe(resultEvents -> {
                     System.out.println("Got " + resultEvents.length + " events");
                     List<CalendarEvent> eventsInMonth = eventsInMonth(currentMonthYear, resultEvents);
-                    final CalendarMonthDayArrayAdapter adapter = new CalendarMonthDayArrayAdapter(getContext(), eventsByDayOfMonth(eventsInMonth, daysInMonth));
+                    final CalendarMonthDayArrayAdapter adapter = new CalendarMonthDayArrayAdapter(
+                            getContext(),
+                            eventsByDayOfMonth(eventsInMonth, daysInMonth),
+                            currentMonthYear);
+
                     listview.setAdapter(adapter);
 
                 }, throwable -> {

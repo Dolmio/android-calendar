@@ -4,9 +4,10 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import org.joda.time.LocalDate;
 
+import java.io.Serializable;
 import java.util.Date;
 
-public class CalendarEvent {
+public class CalendarEvent implements Serializable{
 
     private final String description;
     private final LocalDate startTime;

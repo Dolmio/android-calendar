@@ -2,6 +2,7 @@ package fi.aalto.calendar.app;
 
 import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
+import android.support.v4.app.FragmentManager;
 import android.support.v4.view.ViewPager;
 
 public class MainActivity extends FragmentActivity {
@@ -16,5 +17,15 @@ public class MainActivity extends FragmentActivity {
         MonthPageAdapter adapter = new MonthPageAdapter(getSupportFragmentManager());
         pager.setAdapter(adapter);
         pager.setCurrentItem(adapter.getInitialPosition());
+    }
+
+    @Override
+    public void onBackPressed(){
+        FragmentManager fm = getSupportFragmentManager();
+        if (fm.getBackStackEntryCount() > 0) {
+            fm.popBackStack();
+        } else {
+            super.onBackPressed();
+        }
     }
 }
