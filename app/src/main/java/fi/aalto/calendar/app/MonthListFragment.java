@@ -15,6 +15,7 @@ import rx.Observable;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class MonthListFragment extends Fragment {
@@ -44,10 +45,13 @@ public class MonthListFragment extends Fragment {
                              Bundle savedInstanceState) {
 
         View view = inflater.inflate(R.layout.fragment_month_list, container, false);
-        final ListView listview = (ListView) view.findViewById(R.id.listView);
+        final ListView listview = (ListView) view.findViewById(R.id.monthView);
         final TextView monthLabel = (TextView) view.findViewById(R.id.month_label);
 
         final YearMonth currentMonthYear = (YearMonth) getArguments().getSerializable(YEAR_MONTH_KEY);
+
+        int daysInMonth = currentMonthYear.toLocalDate(1).dayOfMonth().withMaximumValue().getDayOfMonth();
+
         monthLabel.setText(currentMonthYear.toString());
 
         ObjectMapper mapper = ((CalendarApplication) getActivity().getApplication()).objectMapper;
@@ -58,7 +62,8 @@ public class MonthListFragment extends Fragment {
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(resultEvents -> {
                     System.out.println("Got " + resultEvents.length + " events");
-                    final CalendarEventArrayAdapter adapter = new CalendarEventArrayAdapter(getContext(), eventsInMonth(currentMonthYear, resultEvents));
+                    List<CalendarEvent> eventsInMonth = eventsInMonth(currentMonthYear, resultEvents);
+                    final CalendarMonthDayArrayAdapter adapter = new CalendarMonthDayArrayAdapter(getContext(), eventsByDayOfMonth(eventsInMonth, daysInMonth));
                     listview.setAdapter(adapter);
 
                 }, throwable -> {
@@ -75,6 +80,19 @@ public class MonthListFragment extends Fragment {
                 (e.getStartTime().getMonthOfYear() == yearMonth.getMonthOfYear() && e.getStartTime().getYear() == yearMonth.getYear()) ||
                 (e.getEndTime().getMonthOfYear() == yearMonth.getMonthOfYear() && e.getEndTime().getYear() == yearMonth.getYear()))
                 .collect(Collectors.toList());
+    }
+
+    public static List<List<CalendarEvent>> eventsByDayOfMonth(List<CalendarEvent> events, int daysInMoth) {
+        List<List<CalendarEvent>> result = new ArrayList<>();
+        for(int i = 0; i < daysInMoth; i++) {
+            int dayNumber = i +1;
+            List<CalendarEvent> eventsInDay = Stream.of(events).filter((e) ->
+                e.getStartTime().getDayOfMonth() <= dayNumber && e.getEndTime().getDayOfMonth() >= dayNumber
+            ).collect(Collectors.toList());
+            result.add(i, eventsInDay);
+        }
+        return result;
+
     }
 
 }
