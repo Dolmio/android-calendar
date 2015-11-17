@@ -10,23 +10,25 @@ import java.util.Date;
 public class CalendarEvent implements Serializable{
 
     private final String description;
+    private final String location;
     private final LocalDate startTime;
     private final LocalDate endTime;
 
     @JsonCreator
     public CalendarEvent(@JsonProperty("description") String description,
+                         @JsonProperty("location") String location,
                          @JsonProperty("startTime") Date startTime,
                          @JsonProperty("endTime") Date endTime) {
 
         this.description = description;
+        this.location = location;
         this.startTime = LocalDate.fromDateFields(startTime);
         this.endTime = LocalDate.fromDateFields(endTime);
 
     }
 
-    public String getDescription() {
-        return description;
-    }
+    public String getDescription() {return description;}
+    public String getLocation() {return location;}
     public LocalDate getEndTime() {return endTime;}
     public LocalDate getStartTime() {return startTime;}
 
