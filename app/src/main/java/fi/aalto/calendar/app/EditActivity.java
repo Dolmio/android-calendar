@@ -10,6 +10,7 @@ import android.widget.EditText;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.squareup.okhttp.FormEncodingBuilder;
+import com.squareup.okhttp.MediaType;
 import com.squareup.okhttp.RequestBody;
 
 import java.text.ParseException;
@@ -72,13 +73,11 @@ public class EditActivity extends Activity {
                 String editableEventInJSON = mapper.writeValueAsString(editableEvent);
 
                 //The request
-                    //TODO
-                RequestBody formBody = new FormEncodingBuilder()
-                        .add("bla", "value")
-                        .build();
+                MediaType JSON = MediaType.parse("application/json; charset=utf-8");
+                RequestBody body = RequestBody.create(JSON, editableEventInJSON);
 
                 //Call addEvent or editEvent (ApiClient)
-                    //TODO
+                //TODO
 
                 //Leave the activity with a toast which contains the result
                     //TODO

@@ -9,17 +9,20 @@ import java.util.Date;
 
 public class CalendarEvent implements Serializable{
 
+    private final String _id;
     private final String description;
     private final String location;
     private final LocalDate startTime;
     private final LocalDate endTime;
 
     @JsonCreator
-    public CalendarEvent(@JsonProperty("description") String description,
+    public CalendarEvent(@JsonProperty("_id") String _id,
+                         @JsonProperty("description") String description,
                          @JsonProperty("location") String location,
                          @JsonProperty("startTime") Date startTime,
                          @JsonProperty("endTime") Date endTime) {
 
+        this._id = _id;
         this.description = description;
         this.location = location;
         this.startTime = LocalDate.fromDateFields(startTime);
