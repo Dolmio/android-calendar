@@ -1,11 +1,13 @@
 package fi.aalto.calendar.app;
 
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.app.Activity;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.Toast;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -52,6 +54,8 @@ public class EditActivity extends Activity {
     String StartDateCalendarEvent = "";
     String EndDateCalendarEvent = "";
 
+    CalendarEvent editableEvent;
+
     private View.OnClickListener clickListenerButtonManage = new View.OnClickListener() {
         @Override
         public void onClick(View v) {
@@ -66,7 +70,13 @@ public class EditActivity extends Activity {
                 Date endEventDate = format.parse(endEvent);
 
                 //Information to a CalendarEvent object
-                CalendarEvent editableEvent = new CalendarEvent(name.getText().toString(), location.getText().toString(), startEventDate, endEventDate);
+                if (IDCalendarEvent != null && !IDCalendarEvent.isEmpty()) {
+                    //Add an event
+                    editableEvent = new CalendarEvent("",name.getText().toString(), location.getText().toString(), startEventDate, endEventDate);
+                } else {
+                    //Edit an event
+                    editableEvent = new CalendarEvent(IDCalendarEvent,name.getText().toString(), location.getText().toString(), startEventDate, endEventDate);
+                }
 
                 //Now in JSON
                 ObjectMapper mapper = new ObjectMapper();
@@ -77,14 +87,22 @@ public class EditActivity extends Activity {
                 RequestBody body = RequestBody.create(JSON, editableEventInJSON);
 
                 //Call addEvent or editEvent (ApiClient)
-                //TODO
+                String answer = ApiClient.addOrEditEvent(((CalendarApplication) getApplication()).httpClient, body);
 
                 //Leave the activity with a toast which contains the result
-                    //TODO
+                Context context = getApplicationContext();
+                int duration = Toast.LENGTH_LONG;
+
+                Toast toast = Toast.makeText(context, answer, duration);
+                toast.show();
+
+                finish();
 
             } catch (ParseException e) {
                 e.printStackTrace();
             } catch (JsonProcessingException e) {
+                e.printStackTrace();
+            } catch (Exception e) {
                 e.printStackTrace();
             }
         }
