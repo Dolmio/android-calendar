@@ -4,10 +4,10 @@
     tools:context="fi.aalto.calendar.app.MainActivity">
       <item
           android:id="@+id/add_menu"
-          android:title="Add"
+          android:title="Add Event"
           app:showAsAction="always"/>
-    <item android:id="@+id/action_settings"
-          android:title="@string/action_settings"
-          android:orderInCategory="100"
-          app:showAsAction="never"/>
+      <item
+              android:id="@+id/sync_menu"
+              android:title="Sync"
+              app:showAsAction="always"/>
 </menu>
