@@ -81,14 +81,16 @@
                 android:layout_height="wrap_content"
                 android:inputType="date"
                 android:ems="10"
-                android:id="@+id/editTextStartDate" />
+                android:id="@+id/editTextStartDate"
+                android:onClick="showDatePickerDialog"/>
 
             <EditText
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:inputType="date"
                 android:ems="10"
-                android:id="@+id/editTextStartHour" />
+                android:id="@+id/editTextStartHour"
+                android:onClick="showTimePickerDialog"/>
         </LinearLayout>
 
         <LinearLayout
@@ -108,14 +110,16 @@
                 android:layout_height="wrap_content"
                 android:inputType="date"
                 android:ems="10"
-                android:id="@+id/editTextEndDate" />
+                android:id="@+id/editTextEndDate"
+                android:onClick="showDatePickerDialog"/>
 
             <EditText
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:inputType="date"
                 android:ems="10"
-                android:id="@+id/editTextEndTime" />
+                android:id="@+id/editTextEndTime"
+                android:onClick="showTimePickerDialog"/>
         </LinearLayout>
 
         <TextView

@@ -1,13 +1,14 @@
 package fi.aalto.calendar.app;
 
+import android.app.TimePickerDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.app.Activity;
+import android.support.v4.app.DialogFragment;
+import android.support.v4.app.FragmentActivity;
 import android.view.View;
-import android.widget.Button;
-import android.widget.EditText;
-import android.widget.Toast;
+import android.widget.*;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -39,7 +40,7 @@ import rx.Observable;
 
      */
 
-public class EditActivity extends Activity {
+public class EditActivity extends FragmentActivity {
 
     EditText name = null;
     EditText location = null;
@@ -55,7 +56,7 @@ public class EditActivity extends Activity {
     String EndDateCalendarEvent = "";
 
     CalendarEvent editableEvent;
-
+    private static String TWO_NUMBER_FORMAT = "%02d";
     private View.OnClickListener clickListenerButtonManage = new View.OnClickListener() {
         @Override
         public void onClick(View v) {
@@ -147,6 +148,24 @@ public class EditActivity extends Activity {
         //Set a listener to the button
         Button save = (Button) findViewById(R.id.buttonManage);
         save.setOnClickListener(clickListenerButtonManage);
+
+
+
+    }
+
+    public void showTimePickerDialog(View v) {
+        DialogFragment newFragment = TimePickerFragment.newInstance((view, hourOfDay, minute) ->
+                ((TextView)v).setText(String.format(TWO_NUMBER_FORMAT + ":" + TWO_NUMBER_FORMAT, hourOfDay, minute))
+        );
+        newFragment.show(getSupportFragmentManager(), "timePicker");
+    }
+
+    public void showDatePickerDialog(View v) {
+        DialogFragment newFragment = DatePickerFragment.newInstance((view, year, month, dayOfMonth) ->
+
+                ((TextView)v).setText( String.format(year+"-"+TWO_NUMBER_FORMAT + "-" + TWO_NUMBER_FORMAT, month, dayOfMonth))
+        );
+        newFragment.show(getSupportFragmentManager(), "datePicker");
 
     }
 }
