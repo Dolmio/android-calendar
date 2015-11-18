@@ -1,6 +1,7 @@
 package fi.aalto.calendar.app;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import org.joda.time.LocalDate;
 import org.joda.time.LocalDateTime;
@@ -32,6 +33,7 @@ public class CalendarEvent implements Serializable{
     }
 
     public String getDescription() {return description;}
+    public String getId() {return _id;}
     public String getLocation() {return location;}
     public LocalDateTime getEndTime() {return endTime;}
     public LocalDateTime getStartTime() {return startTime;}

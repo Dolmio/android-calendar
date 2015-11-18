@@ -21,6 +21,8 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 
 import rx.Observable;
+import rx.android.schedulers.AndroidSchedulers;
+import rx.schedulers.Schedulers;
 
     /*
     To call this activity :
@@ -79,31 +81,23 @@ public class EditActivity extends FragmentActivity {
                     editableEvent = new CalendarEvent(IDCalendarEvent,name.getText().toString(), location.getText().toString(), startEventDate, endEventDate);
                 }
 
-                //Now in JSON
-                ObjectMapper mapper = new ObjectMapper();
-                String editableEventInJSON = mapper.writeValueAsString(editableEvent);
-
-                //The request
-                MediaType JSON = MediaType.parse("application/json; charset=utf-8");
-                RequestBody body = RequestBody.create(JSON, editableEventInJSON);
-
-                //Call addEvent or editEvent (ApiClient)
-                String answer = ApiClient.addOrEditEvent(((CalendarApplication) getApplication()).httpClient, body);
-
-                //Leave the activity with a toast which contains the result
-                Context context = getApplicationContext();
-                int duration = Toast.LENGTH_LONG;
-
-                Toast toast = Toast.makeText(context, answer, duration);
-                toast.show();
-
-                finish();
+                CalendarApplication app = (CalendarApplication) getApplication();
+                ApiClient.addEvent(editableEvent, app.httpClient, app.objectMapper).
+                        subscribeOn(Schedulers.newThread())
+                        .observeOn(AndroidSchedulers.mainThread())
+                        .subscribe(
+                                result -> {
+                                    Toast.makeText(getApplicationContext(), "Saved event succesfully!", Toast.LENGTH_LONG).show();
+                                    finish();
+                                },
+                                throwable -> Toast.makeText(getApplicationContext(), throwable.getMessage(), Toast.LENGTH_LONG).show());
 
             } catch (ParseException e) {
-                e.printStackTrace();
-            } catch (JsonProcessingException e) {
+                Toast.makeText(getApplicationContext(), "Event is not valid. Please fill all the fields.", Toast.LENGTH_LONG).show();
+
                 e.printStackTrace();
             } catch (Exception e) {
+                System.err.println(e.getMessage());
                 e.printStackTrace();
             }
         }
@@ -163,7 +157,7 @@ public class EditActivity extends FragmentActivity {
     public void showDatePickerDialog(View v) {
         DialogFragment newFragment = DatePickerFragment.newInstance((view, year, month, dayOfMonth) ->
 
-                ((TextView)v).setText( String.format(year+"-"+TWO_NUMBER_FORMAT + "-" + TWO_NUMBER_FORMAT, month, dayOfMonth))
+                ((TextView)v).setText( String.format(year+"-"+TWO_NUMBER_FORMAT + "-" + TWO_NUMBER_FORMAT, month + 1, dayOfMonth))
         );
         newFragment.show(getSupportFragmentManager(), "datePicker");
 

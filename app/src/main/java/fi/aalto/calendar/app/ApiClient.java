@@ -1,11 +1,8 @@
 package fi.aalto.calendar.app;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.squareup.okhttp.FormEncodingBuilder;
-import com.squareup.okhttp.OkHttpClient;
-import com.squareup.okhttp.Request;
-import com.squareup.okhttp.RequestBody;
-import com.squareup.okhttp.Response;
+import com.squareup.okhttp.*;
 
 import rx.Observable;
 import rx.exceptions.OnErrorThrowable;
@@ -28,21 +25,44 @@ public class ApiClient {
                 }) .flatMap(is -> JacksonObservable.createObservable(objectMapper, is, CalendarEvent[].class));
     }
 
-    //Add & Edit an event
-    public static String addOrEditEvent(OkHttpClient httpClient, RequestBody formBody) throws Exception {
-        Request request = new Request.Builder()
-                .url(eventsUrl)
-                .post(formBody)
-                .build();
-        Response response = httpClient.newCall(request).execute();
-        if (!response.isSuccessful()) throw new IOException("ERROR : " + response);
-       return response.body().string();
+    public static Observable<CalendarEvent> addEvent(CalendarEvent event, OkHttpClient httpClient, ObjectMapper objectMapper) {
+        RequestBody body = requestBodyForCreateAndEdit(event, objectMapper);
+        return OkHttpObservable.createObservable(httpClient, new Request.Builder().url(eventsUrl).post(body).build())
+                .map(response -> {
+                    try {
+                        return response.body().byteStream();
+                    } catch (IOException e) {
+                        throw OnErrorThrowable.from(e);
+                    }
+                }
+                ).flatMap(is -> JacksonObservable.createObservable(objectMapper, is, CalendarEvent.class));
     }
 
     //Sync TO
-        //TODO
+    //TODO
 
     //Sync FROM
-        //TODO
+    //TODO
+
+    //EDIT
+    //TODO
+
+
+    private static RequestBody requestBodyForCreateAndEdit(CalendarEvent event, ObjectMapper mapper) {
+        String editableEventInJSON = null;
+        try {
+            editableEventInJSON = mapper.writeValueAsString(event);
+        } catch (JsonProcessingException e) {
+            e.printStackTrace();
+        }
+
+        //The request
+        MediaType JSON = MediaType.parse("application/json; charset=utf-8");
+        return RequestBody.create(JSON, editableEventInJSON);
+    }
+
+
+
+
 
 }

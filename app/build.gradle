@@ -67,6 +67,8 @@ dependencies {
     compile 'com.android.support:support-v4:23.1.0'
     compile 'joda-time:joda-time:2.8.2'
     compile 'com.annimon:stream:1.0.4'
+    compile 'com.fasterxml.jackson.datatype:jackson-datatype-joda:2.6.3'
+
 
 }
 
