@@ -5,7 +5,10 @@ import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ListView;
 import android.widget.TextView;
+import com.annimon.stream.Collectors;
+import com.annimon.stream.Stream;
 import org.joda.time.LocalDate;
 
 import java.util.ArrayList;
@@ -48,7 +51,34 @@ public class DayViewFragment extends Fragment {
 
         TextView dateLabel = (TextView) view.findViewById(R.id.dateLabel);
         dateLabel.setText(date.toString());
+
+        final ListView listview = (ListView) view.findViewById(R.id.hourList);
+        List<List<CalendarEvent>> eventsByHour = eventsByHourInDay(events);
+        listview.setAdapter(new CalendarDayHourArrayAdapter(getContext(), eventsByHour));
+
+        listview.setSelection(getFirstPositionWhereNotEmpty(eventsByHour));
         return view;
+    }
+
+    public static int getFirstPositionWhereNotEmpty(List<List<CalendarEvent>> lists) {
+        for (int i = 0; i<lists.size(); i++){
+            if(!lists.get(i).isEmpty()){
+                return i;
+            }
+        }
+        return 0;
+    }
+    public static List<List<CalendarEvent>> eventsByHourInDay(List<CalendarEvent> events) {
+        List<List<CalendarEvent>> result = new ArrayList<>();
+        for(int i = 0; i < 24; i++) {
+            final int hour = i;
+            List<CalendarEvent> eventsInDay = Stream.of(events).filter((e) ->
+                    e.getStartTime().getHourOfDay() <= hour && e.getEndTime().getHourOfDay() >= hour
+            ).collect(Collectors.toList());
+            result.add(i, eventsInDay);
+        }
+        return result;
+
     }
 
 }
