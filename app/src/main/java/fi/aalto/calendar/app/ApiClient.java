@@ -13,6 +13,8 @@ public class ApiClient {
 
     private static final String host = "http://10.5.1.77:8080/";
     private static final String eventsUrl = host + "api/event";
+    private static final String syncToUrl = host + "api/sync-to";
+    private static final String syncFromUrl = host + "api/sync-from";
 
     public static Observable<CalendarEvent[]> getEvents(OkHttpClient httpClient, ObjectMapper objectMapper) {
         return OkHttpObservable.createObservable(httpClient, new Request.Builder().url(eventsUrl).get().build())
@@ -66,17 +68,30 @@ public class ApiClient {
 
     }
 
+    public static Observable<String> syncToGoogle( OkHttpClient httpClient, ObjectMapper objectMapper) {
+        return sync(syncToUrl, httpClient, objectMapper);
+    }
+
+    public static Observable<String> syncFromGoogle( OkHttpClient httpClient, ObjectMapper objectMapper) {
+        return sync(syncFromUrl, httpClient, objectMapper);
+    }
 
 
-    //Sync TO
-    //TODO
 
-    //Sync FROM
-    //TODO
+    private static Observable<String> sync(String url, OkHttpClient httpClient, ObjectMapper objectMapper) {
+        MediaType JSON = MediaType.parse("application/json; charset=utf-8");
+        RequestBody body  = RequestBody.create(JSON, "{}");
 
-    //EDIT
-    //TODO
-
+        return OkHttpObservable.createObservable(httpClient, new Request.Builder().url(url).post(body).build())
+                .map(response -> {
+                            try {
+                                return response.body().string();
+                            } catch (IOException e) {
+                                throw OnErrorThrowable.from(e);
+                            }
+                        }
+                );
+    }
 
     private static RequestBody requestBodyForCreateAndEdit(CalendarEvent event, ObjectMapper mapper) {
         String editableEventInJSON = null;
