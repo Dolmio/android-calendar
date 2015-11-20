@@ -1,25 +1,19 @@
 package fi.aalto.calendar.app;
 
-import android.app.TimePickerDialog;
-import android.content.Context;
+
 import android.content.Intent;
 import android.os.Bundle;
-import android.app.Activity;
 import android.support.v4.app.DialogFragment;
 import android.support.v4.app.FragmentActivity;
 import android.view.View;
 import android.widget.*;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.squareup.okhttp.FormEncodingBuilder;
-import com.squareup.okhttp.MediaType;
-import com.squareup.okhttp.RequestBody;
-
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
+import org.joda.time.format.DateTimeFormat;
+import org.joda.time.format.DateTimeFormatter;
 import rx.Observable;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
@@ -31,33 +25,27 @@ import rx.schedulers.Schedulers;
     startActivity(intent);
 
     Edit an Event :
-    Date format : "YYYY-MM-DD HH:MM"
-
-    intent.putExtra(IDCalendarEvent, "rth1sd56df4df");
-    intent.putExtra(NameCalendarEvent, "A name");
-    intent.putExtra(LocationCalendarEvent, "A location");
-    intent.putExtra(StartDateCalendarEvent, "YYYY-MM-DD HH:MM");
-    intent.putExtra(EndDateCalendarEvent, "YYYY-MM-DD HH:MM");
+    intent.putExtra(EditActivity.EVENT_PARAMETER, event);
     startActivity(intent);
 
      */
 
 public class EditActivity extends FragmentActivity {
 
-    EditText name = null;
-    EditText location = null;
-    EditText startDate = null;
-    EditText startHour = null;
-    EditText endDate = null;
-    EditText endHour = null;
+    public static String EVENT_PARAMETER = "event";
 
-    String IDCalendarEvent = "";
-    String NameCalendarEvent = "";
-    String LocationCalendarEvent = "";
-    String StartDateCalendarEvent = "";
-    String EndDateCalendarEvent = "";
+    EditText name;
+    EditText location;
+    EditText startDate;
+    EditText startHour;
+    EditText endDate;
+    EditText endHour;
 
-    CalendarEvent editableEvent;
+    CalendarEvent event;
+
+    private DateTimeFormatter dateFormat = DateTimeFormat.forPattern("yyyy-MM-dd");
+    private DateTimeFormatter hourFormat = DateTimeFormat.forPattern("HH:mm");
+
     private static String TWO_NUMBER_FORMAT = "%02d";
     private View.OnClickListener clickListenerButtonManage = new View.OnClickListener() {
         @Override
@@ -67,22 +55,26 @@ public class EditActivity extends FragmentActivity {
             String endEvent = endDate.getText().toString().concat(" ").concat(endHour.getText().toString());
             SimpleDateFormat  format = new SimpleDateFormat("yyyy-MM-dd' 'HH:mm");
 
+
+
             try {
                 //Date objects
                 Date startEventDate = format.parse(startEvent);
                 Date endEventDate = format.parse(endEvent);
 
-                //Information to a CalendarEvent object
-                if (IDCalendarEvent != null && !IDCalendarEvent.isEmpty()) {
-                    //Add an event
-                    editableEvent = new CalendarEvent("",name.getText().toString(), location.getText().toString(), startEventDate, endEventDate);
-                } else {
-                    //Edit an event
-                    editableEvent = new CalendarEvent(IDCalendarEvent,name.getText().toString(), location.getText().toString(), startEventDate, endEventDate);
+                Observable<CalendarEvent> saveObservable;
+                CalendarApplication app = (CalendarApplication) getApplication();
+                if(event != null) {
+
+                    CalendarEvent editedEvent = new CalendarEvent(event.getId(), name.getText().toString(), location.getText().toString(), startEventDate, endEventDate);
+                    saveObservable =  ApiClient.editEvent(editedEvent, app.httpClient, app.objectMapper);
+                }
+                else {
+                    CalendarEvent newEvent = new CalendarEvent("", name.getText().toString(), location.getText().toString(), startEventDate, endEventDate );
+                    saveObservable =  ApiClient.addEvent(newEvent, app.httpClient, app.objectMapper);
                 }
 
-                CalendarApplication app = (CalendarApplication) getApplication();
-                ApiClient.addEvent(editableEvent, app.httpClient, app.objectMapper).
+                saveObservable.
                         subscribeOn(Schedulers.newThread())
                         .observeOn(AndroidSchedulers.mainThread())
                         .subscribe(
@@ -118,27 +110,16 @@ public class EditActivity extends FragmentActivity {
 
         //If you call this activity to add an event or to update an event
         Intent intent = getIntent();
-        IDCalendarEvent = intent.getStringExtra("IDCalendarEvent");
-        if (IDCalendarEvent != null && !IDCalendarEvent.isEmpty()) {
-            NameCalendarEvent = intent.getStringExtra("NameCalendarEvent");
-            LocationCalendarEvent = intent.getStringExtra("LocationCalendarEvent");
-            StartDateCalendarEvent = intent.getStringExtra("StartDateCalendarEvent");
-            EndDateCalendarEvent = intent.getStringExtra("EndDateCalendarEvent");
+        event = (CalendarEvent) intent.getSerializableExtra(EVENT_PARAMETER);
 
-            //Fill the view with the information already known
-            name.setText(NameCalendarEvent);
-            location.setText(LocationCalendarEvent);
-
-            //Split the date in 2 parts for the view
-            String[] startDateparts = StartDateCalendarEvent.split(" ");
-            String[] endDateparts = EndDateCalendarEvent.split(" ");
-
-            startDate.setText(startDateparts[0]);
-            startHour.setText(startDateparts[1]);
-            endDate.setText(endDateparts[0]);
-            endHour.setText(endDateparts[1]);
+        if(event != null) {
+            name.setText(event.getDescription());
+            location.setText(event.getLocation());
+            startDate.setText(dateFormat.print(event.getStartTime()));
+            startHour.setText(hourFormat.print(event.getStartTime()));
+            endDate.setText(dateFormat.print(event.getEndTime()));
+            endHour.setText(hourFormat.print(event.getEndTime()));
         }
-
         //Set a listener to the button
         Button save = (Button) findViewById(R.id.buttonManage);
         save.setOnClickListener(clickListenerButtonManage);

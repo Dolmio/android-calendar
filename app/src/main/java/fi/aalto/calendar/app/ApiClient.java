@@ -38,6 +38,22 @@ public class ApiClient {
                 ).flatMap(is -> JacksonObservable.createObservable(objectMapper, is, CalendarEvent.class));
     }
 
+    public static Observable<CalendarEvent> editEvent(CalendarEvent event, OkHttpClient httpClient, ObjectMapper objectMapper) {
+        RequestBody body = requestBodyForCreateAndEdit(event, objectMapper);
+        String url = eventsUrl + "/" + event.getId();
+        return OkHttpObservable.createObservable(httpClient, new Request.Builder().url(url).put(body).build())
+                .map(response -> {
+                            try {
+                                return response.body().byteStream();
+                            } catch (IOException e) {
+                                throw OnErrorThrowable.from(e);
+                            }
+                        }
+                ).flatMap(is -> JacksonObservable.createObservable(objectMapper, is, CalendarEvent.class));
+    }
+
+
+
     //Sync TO
     //TODO
 

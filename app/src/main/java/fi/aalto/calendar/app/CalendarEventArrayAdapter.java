@@ -1,6 +1,8 @@
 package fi.aalto.calendar.app;
 
+import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -27,6 +29,12 @@ public class CalendarEventArrayAdapter extends ArrayAdapter<CalendarEvent> {
         TextView textView = (TextView) rowView.findViewById(R.id.descriptionLabel);
         CalendarEvent event = values.get(position);
         textView.setText(event.getDescription());
+
+        rowView.setOnClickListener(v -> {
+            Intent intent = new Intent(getContext(), EditActivity.class);
+            intent.putExtra(EditActivity.EVENT_PARAMETER, event);
+            getContext().startActivity(intent);
+        });
         return rowView;
     }
 
