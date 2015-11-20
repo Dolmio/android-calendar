@@ -107,7 +107,7 @@ public class EditActivity extends FragmentActivity {
         startHour = (EditText) findViewById(R.id.editTextStartHour);
         endDate = (EditText) findViewById(R.id.editTextEndDate);
         endHour = (EditText) findViewById(R.id.editTextEndTime);
-
+        View deleteButton = findViewById(R.id.buttonDelete);
         //If you call this activity to add an event or to update an event
         Intent intent = getIntent();
         event = (CalendarEvent) intent.getSerializableExtra(EVENT_PARAMETER);
@@ -120,9 +120,25 @@ public class EditActivity extends FragmentActivity {
             endDate.setText(dateFormat.print(event.getEndTime()));
             endHour.setText(hourFormat.print(event.getEndTime()));
         }
+        else {
+            deleteButton.setVisibility(View.GONE);
+        }
         //Set a listener to the button
         Button save = (Button) findViewById(R.id.buttonManage);
         save.setOnClickListener(clickListenerButtonManage);
+
+        deleteButton.setOnClickListener(v -> {
+            CalendarApplication app = (CalendarApplication) getApplication();
+            ApiClient.deleteEvent(event, app.httpClient, app.objectMapper).
+                subscribeOn(Schedulers.newThread())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(
+                        result -> {
+                            Toast.makeText(getApplicationContext(), "Deleted event succesfully!", Toast.LENGTH_LONG).show();
+                            finish();
+                        },
+                        throwable -> Toast.makeText(getApplicationContext(), throwable.getMessage(), Toast.LENGTH_LONG).show());
+        });
 
 
 

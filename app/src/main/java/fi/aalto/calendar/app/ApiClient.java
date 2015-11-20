@@ -52,6 +52,20 @@ public class ApiClient {
                 ).flatMap(is -> JacksonObservable.createObservable(objectMapper, is, CalendarEvent.class));
     }
 
+    public static Observable<String> deleteEvent(CalendarEvent event, OkHttpClient httpClient, ObjectMapper objectMapper) {
+        String url = eventsUrl + "/" + event.getId();
+        return OkHttpObservable.createObservable(httpClient, new Request.Builder().url(url).delete().build())
+                .map(response -> {
+                            try {
+                                return response.body().string();
+                            } catch (IOException e) {
+                                throw OnErrorThrowable.from(e);
+                            }
+                        }
+                );
+
+    }
+
 
 
     //Sync TO
