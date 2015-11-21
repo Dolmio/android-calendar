@@ -22,6 +22,10 @@ public class MonthListFragment extends Fragment {
 
     private static final String YEAR_MONTH_KEY = "currentYearMonth";
 
+    private ListView listView;
+    private TextView monthLabel;
+
+
     public static MonthListFragment newInstance(YearMonth yearMonth) {
         MonthListFragment fragment = new MonthListFragment();
         Bundle args = new Bundle();
@@ -45,15 +49,20 @@ public class MonthListFragment extends Fragment {
                              Bundle savedInstanceState) {
 
         View view = inflater.inflate(R.layout.fragment_month_list, container, false);
-        final ListView listview = (ListView) view.findViewById(R.id.monthView);
-        final TextView monthLabel = (TextView) view.findViewById(R.id.month_label);
+        listView = (ListView) view.findViewById(R.id.monthView);
+        monthLabel = (TextView) view.findViewById(R.id.month_label);
 
+        return view;
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
         final YearMonth currentMonthYear = (YearMonth) getArguments().getSerializable(YEAR_MONTH_KEY);
 
         int daysInMonth = currentMonthYear.toLocalDate(1).dayOfMonth().withMaximumValue().getDayOfMonth();
 
         monthLabel.setText(currentMonthYear.toString());
-
         ObjectMapper mapper = ((CalendarApplication) getActivity().getApplication()).objectMapper;
         Observable<CalendarEvent[]> eventsObservable = ApiClient.getEvents(((CalendarApplication) getActivity().getApplication()).httpClient, mapper);
 
@@ -68,7 +77,7 @@ public class MonthListFragment extends Fragment {
                             eventsByDayOfMonth(eventsInMonth, daysInMonth),
                             currentMonthYear);
 
-                    listview.setAdapter(adapter);
+                    listView.setAdapter(adapter);
 
                 }, throwable -> {
                     System.err.println("Something went wrong when fetching the events");
@@ -76,7 +85,6 @@ public class MonthListFragment extends Fragment {
                     System.err.println(throwable.getMessage());
                 });
 
-        return view;
     }
 
     public static List<CalendarEvent> eventsInMonth(YearMonth yearMonth, CalendarEvent[] events) {
